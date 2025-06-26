@@ -269,12 +269,6 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal-content {
@@ -287,12 +281,6 @@
             max-width: 800px;
             max-height: 80vh;
             overflow-y: auto;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .close {
@@ -337,17 +325,10 @@
             background: #357abd;
         }
 
-        .movement-history {
-            background: #1a1a1a;
+        .no-history {
+            text-align: center;
+            color: #666;
             padding: 20px;
-            border-radius: 10px;
-            margin-top: 30px;
-            border: 1px solid #333;
-        }
-
-        .movement-history h2 {
-            color: #4a9eff;
-            margin-bottom: 15px;
         }
 
         .history-table {
@@ -365,32 +346,14 @@
             text-align: center;
         }
 
-        .no-history {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .button-group {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .button {
-                width: 100%;
-            }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: rgba(255, 107, 107, 0.2); }
+            100% { transform: scale(1); }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -501,8 +464,8 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        // Variabili globali
         let inventoryData = [];
         let movementHistory = [];
         let chart = null;
@@ -529,7 +492,7 @@
             localStorage.setItem('movementHistory', JSON.stringify(movementHistory));
         }
 
-        // Funzione per caricare i dati iniziali
+        // Carica i dati iniziali
         async function loadInitialData() {
             loadFromStorage();
             
@@ -539,7 +502,7 @@
                     const workbook = XLSX.read(response, { type: 'array' });
                     processExcelData(workbook);
                 } catch (error) {
-                    console.error('Errore nel caricamento del file:', error);
+                    console.error('File non trovato, carico dati di esempio');
                     // Dati di esempio
                     inventoryData = [
                         {
@@ -551,6 +514,18 @@
                             giacenzaIniziale: 102,
                             prezzo: 13.7,
                             totale: 1397.4,
+                            consumo: 0,
+                            consumoEuro: 0
+                        },
+                        {
+                            prodotto: "RAJSSA VODKA FRAGOLA",
+                            scarichi: 0,
+                            cambusa: 23,
+                            barPiscina: 4,
+                            barFondo: 6,
+                            giacenzaIniziale: 33,
+                            prezzo: 7.96,
+                            totale: 262.68,
                             consumo: 0,
                             consumoEuro: 0
                         }
@@ -569,7 +544,6 @@
             
             inventoryData = [];
             
-            // Salta la prima riga (intestazioni) e processa i dati
             for (let i = 1; i < jsonData.length; i++) {
                 const row = jsonData[i];
                 if (row[0] && typeof row[0] === 'string' && row[0].trim() !== '') {
@@ -624,12 +598,10 @@
                 const scarichiInput = document.getElementById(`scarichi_${index}`);
                 const scarichi = parseFloat(scarichiInput.value) || 0;
                 
-                // Calcola il consumo: giacenza iniziale - scarichi (scarichi = quello che rimane)
                 item.scarichi = scarichi;
                 item.consumo = Math.max(0, item.giacenzaIniziale - scarichi);
                 item.consumoEuro = item.consumo * item.prezzo;
                 
-                // Aggiorna la visualizzazione
                 document.getElementById(`consumo_${index}`).textContent = item.consumo.toFixed(1);
                 document.getElementById(`consumoEuro_${index}`).textContent = `€${item.consumoEuro.toFixed(2)}`;
             });
@@ -639,7 +611,6 @@
             saveToStorage();
             
             if (showAnimation) {
-                // Effetto visivo
                 const cells = document.querySelectorAll('.consumo');
                 cells.forEach(cell => {
                     cell.style.animation = 'pulse 0.5s ease';
@@ -667,7 +638,6 @@
         function updateChart() {
             const ctx = document.getElementById('inventoryChart').getContext('2d');
             
-            // Prepara i dati per il grafico
             const labels = inventoryData.slice(0, 20).map(item => 
                 item.prodotto.length > 20 ? item.prodotto.substring(0, 20) + '...' : item.prodotto
             );
@@ -765,7 +735,6 @@
             movementHistory.push(movimento);
             saveToStorage();
             
-            // Aggiorna le giacenze per il prossimo movimento
             inventoryData.forEach(item => {
                 item.giacenzaIniziale = item.scarichi;
                 item.totale = item.giacenzaIniziale * item.prezzo;
@@ -848,8 +817,8 @@
                     item.cambusa,
                     item.barPiscina,
                     item.barFondo,
-                    '', // ORDINE
-                    '', // SPESA
+                    '', 
+                    '', 
                     item.giacenzaIniziale,
                     item.prezzo,
                     item.totale,
@@ -868,7 +837,12 @@
 
         function openModal() {
             document.getElementById('uploadModal').style.display = 'block';
-        } {
+        }
+
+        function openHistoryModal() {
+            const content = document.getElementById('historyContent');
+            
+            if (movementHistory.length === 0) {
                 content.innerHTML = '<div class="no-history">Nessun movimento registrato</div>';
             } else {
                 let html = '<table class="history-table"><thead><tr>';
@@ -973,22 +947,6 @@
                 reader.readAsArrayBuffer(file);
             }
         }
-
-        // Aggiungi animazione pulse
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); background-color: rgba(255, 107, 107, 0.2); }
-                100% { transform: scale(1); }
-            }
-            
-            .sortable::after {
-                content: ' ↕';
-                opacity: 0.5;
-            }
-        `;
-        document.head.appendChild(style);
 
         // Carica i dati all'avvio
         window.addEventListener('load', loadInitialData);
