@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Magazzino - Cambusa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a9eff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 158, 255, 0.3);
+        }
+
+        .button.danger {
+            background: #ff4444;
+        }
+
+        .button.danger:hover {
+            background: #cc0000;
+        }
+
+        .stats {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: #1a1a1a;
+            border-radius: 10px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th {
+            background: #252525;
+            color: #4a9eff;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #444;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        tr:hover {
+            background: #252525;
+        }
+
+        input[type="number"] {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 8px;
+            border-radius: 4px;
+            width: 80px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+
+        .postazione {
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .cambusa { color: #66d9ef; }
+        .bar-piscina { color: #f92672; }
+        .bar-fondo { color: #a6e22e; }
+
+        .totale {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .consumo {
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ff4444;
+        }
+
+        .file-input-wrapper {
+            margin-top: 20px;
+        }
+
+        .file-input-wrapper label {
+            display: block;
+            margin-bottom: 10px;
+            color: #4a9eff;
+            font-weight: 500;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4a9eff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍾 Gestione Magazzino - Cambusa 🍾</h1>
+        
+        <div class="controls">
+            <div>
+                <button class="button" onclick="calcola()">📊 Calcola Consumo</button>
+                <button class="button" onclick="salvaGiacenze()">💾 Salva Giacenze</button>
+                <button class="button danger" onclick="resetScarichi()">🔄 Reset Scarichi</button>
+            </div>
+            <div>
+                <button class="button" onclick="openModal()">📁 Carica File Excel</button>
+                <button class="button" onclick="esportaDati()">📥 Esporta Dati</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totaleIniziale">€0</div>
+                <div class="stat-label">Valore Giacenza Iniziale</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totaleConsumo">€0</div>
+                <div class="stat-label">Consumo Totale</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totaleRimanente">€0</div>
+                <div class="stat-label">Valore Rimanente</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="percentualeConsumo">0%</div>
+                <div class="stat-label">% Consumata</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Prodotto</th>
+                        <th>Scarichi</th>
+                        <th class="cambusa">Cambusa</th>
+                        <th class="bar-piscina">Bar Piscina</th>
+                        <th class="bar-fondo">Bar in Fondo</th>
+                        <th>Giacenza Iniziale</th>
+                        <th>Prezzo (€)</th>
+                        <th>Totale (€)</th>
+                        <th class="consumo">Consumo</th>
+                        <th class="consumo">Consumo (€)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Carica File Excel</h2>
+            <div class="file-input-wrapper">
+                <label>Seleziona il file Excel con i dati del magazzino:</label>
+                <label for="fileInput" class="file-input-label">
+                    Scegli File
+                </label>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let inventoryData = [];
+
+        // Funzione per caricare i dati iniziali
+        async function loadInitialData() {
+            try {
+                const response = await window.fs.readFile('SCARICHI  CAMBUSA   ESTIVO 2025.xlsx');
+                const workbook = XLSX.read(response, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+                
+                // Salta la prima riga (intestazioni) e processa i dati
+                for (let i = 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (row[0]) { // Se c'è un nome prodotto
+                        inventoryData.push({
+                            prodotto: row[0] || '',
+                            scarichi: row[1] || 0,
+                            cambusa: row[2] || 0,
+                            barPiscina: row[3] || 0,
+                            barFondo: row[4] || 0,
+                            giacenzaIniziale: row[7] || 0,
+                            prezzo: row[8] || 0,
+                            totale: row[9] || 0,
+                            consumo: row[10] || 0,
+                            consumoEuro: row[11] || 0
+                        });
+                    }
+                }
+                
+                renderTable();
+                updateStats();
+            } catch (error) {
+                console.error('Errore nel caricamento del file:', error);
+                // Dati di esempio se il file non viene caricato
+                inventoryData = [
+                    {
+                        prodotto: "SKY VODKA BASE",
+                        scarichi: 0,
+                        cambusa: 90,
+                        barPiscina: 6,
+                        barFondo: 6,
+                        giacenzaIniziale: 102,
+                        prezzo: 13.7,
+                        totale: 1397.4,
+                        consumo: 0,
+                        consumoEuro: 0
+                    },
+                    {
+                        prodotto: "RAJSSA VODKA FRAGOLA",
+                        scarichi: 0,
+                        cambusa: 23,
+                        barPiscina: 4,
+                        barFondo: 6,
+                        giacenzaIniziale: 33,
+                        prezzo: 7.96,
+                        totale: 262.68,
+                        consumo: 0,
+                        consumoEuro: 0
+                    }
+                ];
+                renderTable();
+                updateStats();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            inventoryData.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.prodotto}</td>
+                    <td><input type="number" id="scarichi_${index}" value="${item.scarichi}" min="0" step="0.1"></td>
+                    <td class="postazione cambusa">${item.cambusa}</td>
+                    <td class="postazione bar-piscina">${item.barPiscina}</td>
+                    <td class="postazione bar-fondo">${item.barFondo}</td>
+                    <td>${item.giacenzaIniziale}</td>
+                    <td>€${item.prezzo.toFixed(2)}</td>
+                    <td class="totale">€${item.totale.toFixed(2)}</td>
+                    <td class="consumo" id="consumo_${index}">${item.consumo}</td>
+                    <td class="consumo" id="consumoEuro_${index}">€${item.consumoEuro.toFixed(2)}</td>
+                `;
+            });
+        }
+
+        function calcola() {
+            inventoryData.forEach((item, index) => {
+                const scarichiInput = document.getElementById(`scarichi_${index}`);
+                const scarichi = parseFloat(scarichiInput.value) || 0;
+                
+                // Calcola il consumo: giacenza iniziale - scarichi
+                item.scarichi = scarichi;
+                item.consumo = Math.max(0, item.giacenzaIniziale - scarichi);
+                item.consumoEuro = item.consumo * item.prezzo;
+                
+                // Aggiorna la visualizzazione
+                document.getElementById(`consumo_${index}`).textContent = item.consumo.toFixed(1);
+                document.getElementById(`consumoEuro_${index}`).textContent = `€${item.consumoEuro.toFixed(2)}`;
+            });
+            
+            updateStats();
+            
+            // Effetto visivo
+            const cells = document.querySelectorAll('.consumo');
+            cells.forEach(cell => {
+                cell.style.animation = 'pulse 0.5s ease';
+            });
+            setTimeout(() => {
+                cells.forEach(cell => {
+                    cell.style.animation = '';
+                });
+            }, 500);
+        }
+
+        function updateStats() {
+            const totaleIniziale = inventoryData.reduce((sum, item) => sum + item.totale, 0);
+            const totaleConsumo = inventoryData.reduce((sum, item) => sum + item.consumoEuro, 0);
+            const totaleRimanente = totaleIniziale - totaleConsumo;
+            const percentualeConsumo = totaleIniziale > 0 ? (totaleConsumo / totaleIniziale * 100) : 0;
+            
+            document.getElementById('totaleIniziale').textContent = `€${totaleIniziale.toFixed(2)}`;
+            document.getElementById('totaleConsumo').textContent = `€${totaleConsumo.toFixed(2)}`;
+            document.getElementById('totaleRimanente').textContent = `€${totaleRimanente.toFixed(2)}`;
+            document.getElementById('percentualeConsumo').textContent = `${percentualeConsumo.toFixed(1)}%`;
+        }
+
+        function salvaGiacenze() {
+            // Aggiorna le giacenze per la prossima volta
+            inventoryData.forEach((item, index) => {
+                const scarichiValue = parseFloat(document.getElementById(`scarichi_${index}`).value) || 0;
+                // La nuova giacenza iniziale diventa gli scarichi attuali
+                item.giacenzaIniziale = scarichiValue;
+                item.totale = item.giacenzaIniziale * item.prezzo;
+                
+                // Redistribuisci proporzionalmente tra le postazioni
+                const totalePostazioni = item.cambusa + item.barPiscina + item.barFondo;
+                if (totalePostazioni > 0) {
+                    const ratio = item.giacenzaIniziale / totalePostazioni;
+                    item.cambusa = Math.round(item.cambusa * ratio * 10) / 10;
+                    item.barPiscina = Math.round(item.barPiscina * ratio * 10) / 10;
+                    item.barFondo = Math.round(item.barFondo * ratio * 10) / 10;
+                }
+            });
+            
+            renderTable();
+            updateStats();
+            alert('Giacenze salvate con successo! I valori sono stati aggiornati.');
+        }
+
+        function resetScarichi() {
+            if (confirm('Sei sicuro di voler resettare tutti gli scarichi?')) {
+                inventoryData.forEach((item, index) => {
+                    item.scarichi = 0;
+                    item.consumo = 0;
+                    item.consumoEuro = 0;
+                });
+                renderTable();
+                updateStats();
+            }
+        }
+
+        function esportaDati() {
+            const ws_data = [
+                ['PRODOTTI', 'SCARICHI', 'CAMBUSA', 'BAR PISCINA', 'BAR IN FONDO', 'ORDINE', 'SPESA', 'GIACENZA INIZIALE', 'PREZZO', 'TOTALE', 'CONSUMO', 'CONSUMO EURO']
+            ];
+            
+            inventoryData.forEach(item => {
+                ws_data.push([
+                    item.prodotto,
+                    item.scarichi,
+                    item.cambusa,
+                    item.barPiscina,
+                    item.barFondo,
+                    '', // ORDINE
+                    '', // SPESA
+                    item.giacenzaIniziale,
+                    item.prezzo,
+                    item.totale,
+                    item.consumo,
+                    item.consumoEuro
+                ]);
+            });
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Magazzino");
+            
+            const date = new Date().toLocaleDateString('it-IT').replace(/\//g, '-');
+            XLSX.writeFile(wb, `Magazzino_${date}.xlsx`);
+        }
+
+        function openModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+                    
+                    inventoryData = [];
+                    for (let i = 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        if (row[0]) {
+                            inventoryData.push({
+                                prodotto: row[0] || '',
+                                scarichi: row[1] || 0,
+                                cambusa: row[2] || 0,
+                                barPiscina: row[3] || 0,
+                                barFondo: row[4] || 0,
+                                giacenzaIniziale: row[7] || 0,
+                                prezzo: row[8] || 0,
+                                totale: row[9] || 0,
+                                consumo: row[10] || 0,
+                                consumoEuro: row[11] || 0
+                            });
+                        }
+                    }
+                    
+                    renderTable();
+                    updateStats();
+                    closeModal();
+                    alert('File caricato con successo!');
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        // Aggiungi animazione pulse
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); background-color: rgba(255, 107, 107, 0.2); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Carica i dati all'avvio
+        window.addEventListener('load', loadInitialData);
+    </script>
+</body>
+</html>
