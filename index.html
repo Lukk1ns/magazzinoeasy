@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -21,7 +20,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -31,6 +30,32 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
+        }
+
+        .date-selector {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .date-selector label {
+            color: #4a9eff;
+            font-weight: 500;
+        }
+
+        input[type="date"] {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
         .controls {
@@ -44,6 +69,12 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .button {
@@ -72,6 +103,14 @@
             background: #cc0000;
         }
 
+        .button.success {
+            background: #4caf50;
+        }
+
+        .button.success:hover {
+            background: #45a049;
+        }
+
         .stats {
             background: #1a1a1a;
             padding: 20px;
@@ -89,6 +128,11 @@
             border-radius: 8px;
             text-align: center;
             border: 1px solid #444;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
         }
 
         .stat-value {
@@ -103,6 +147,42 @@
             margin-top: 5px;
         }
 
+        .chart-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            height: 400px;
+            position: relative;
+        }
+
+        .sort-controls {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sort-controls label {
+            color: #4a9eff;
+            font-weight: 500;
+        }
+
+        select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         .table-container {
             overflow-x: auto;
             background: #1a1a1a;
@@ -114,7 +194,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            min-width: 1200px;
         }
 
         th {
@@ -127,6 +207,12 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #2a2a2a;
         }
 
         td {
@@ -193,12 +279,14 @@
 
         .modal-content {
             background-color: #1a1a1a;
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 30px;
             border: 1px solid #444;
             border-radius: 10px;
-            width: 80%;
-            max-width: 500px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
             animation: slideIn 0.3s ease;
         }
 
@@ -249,6 +337,40 @@
             background: #357abd;
         }
 
+        .movement-history {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 1px solid #333;
+        }
+
+        .movement-history h2 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+        }
+
+        .history-table {
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .history-table th {
+            background: #2a2a2a;
+            padding: 10px;
+        }
+
+        .history-table td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
         @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
@@ -257,22 +379,40 @@
             .stats {
                 grid-template-columns: 1fr;
             }
+            
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .button {
+                width: 100%;
+            }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>🍾 Gestione Magazzino - Cambusa 🍾</h1>
         
+        <div class="date-selector">
+            <label for="dataSerata">Data Serata:</label>
+            <input type="date" id="dataSerata" value="">
+            <span style="color: #999;">Seleziona la data per registrare i consumi</span>
+        </div>
+
         <div class="controls">
-            <div>
+            <div class="button-group">
                 <button class="button" onclick="calcola()">📊 Calcola Consumo</button>
-                <button class="button" onclick="salvaGiacenze()">💾 Salva Giacenze</button>
-                <button class="button danger" onclick="resetScarichi()">🔄 Reset Scarichi</button>
+                <button class="button success" onclick="salvaMovimento()">💾 Salva Movimento</button>
+                <button class="button" onclick="resetScarichi()">🔄 Reset Scarichi</button>
+                <button class="button danger" onclick="resetTotale()">⚠️ Reset Totale</button>
             </div>
-            <div>
+            <div class="button-group">
                 <button class="button" onclick="openModal()">📁 Carica File Excel</button>
                 <button class="button" onclick="esportaDati()">📥 Esporta Dati</button>
+                <button class="button" onclick="openHistoryModal()">📜 Storico Movimenti</button>
             </div>
         </div>
 
@@ -295,20 +435,39 @@
             </div>
         </div>
 
+        <div class="chart-container">
+            <canvas id="inventoryChart"></canvas>
+        </div>
+
+        <div class="sort-controls">
+            <label>Ordina per:</label>
+            <select id="sortSelect" onchange="sortTable()">
+                <option value="prodotto">Nome Prodotto</option>
+                <option value="giacenzaIniziale">Giacenza Iniziale</option>
+                <option value="consumo">Consumo</option>
+                <option value="consumoEuro">Consumo €</option>
+                <option value="prezzo">Prezzo</option>
+            </select>
+            <select id="sortOrder" onchange="sortTable()">
+                <option value="asc">Crescente</option>
+                <option value="desc">Decrescente</option>
+            </select>
+        </div>
+
         <div class="table-container">
             <table id="inventoryTable">
                 <thead>
                     <tr>
-                        <th>Prodotto</th>
+                        <th onclick="setSortAndOrder('prodotto')">Prodotto ↕</th>
                         <th>Scarichi</th>
                         <th class="cambusa">Cambusa</th>
                         <th class="bar-piscina">Bar Piscina</th>
                         <th class="bar-fondo">Bar in Fondo</th>
-                        <th>Giacenza Iniziale</th>
-                        <th>Prezzo (€)</th>
+                        <th onclick="setSortAndOrder('giacenzaIniziale')">Giacenza Iniziale ↕</th>
+                        <th onclick="setSortAndOrder('prezzo')">Prezzo (€) ↕</th>
                         <th>Totale (€)</th>
-                        <th class="consumo">Consumo</th>
-                        <th class="consumo">Consumo (€)</th>
+                        <th onclick="setSortAndOrder('consumo')">Consumo ↕</th>
+                        <th onclick="setSortAndOrder('consumoEuro')">Consumo (€) ↕</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -317,9 +476,10 @@
         </div>
     </div>
 
+    <!-- Modal Carica File -->
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
             <h2>Carica File Excel</h2>
             <div class="file-input-wrapper">
                 <label>Seleziona il file Excel con i dati del magazzino:</label>
@@ -328,74 +488,110 @@
                 </label>
                 <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
             </div>
+            <div id="uploadResult" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Storico -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('historyModal')">&times;</span>
+            <h2>📜 Storico Movimenti</h2>
+            <div id="historyContent"></div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let inventoryData = [];
+        let movementHistory = [];
+        let chart = null;
+
+        // Inizializza la data di oggi
+        document.getElementById('dataSerata').valueAsDate = new Date();
+
+        // Carica dati dal localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('inventoryData');
+            const history = localStorage.getItem('movementHistory');
+            
+            if (saved) {
+                inventoryData = JSON.parse(saved);
+            }
+            if (history) {
+                movementHistory = JSON.parse(history);
+            }
+        }
+
+        // Salva dati nel localStorage
+        function saveToStorage() {
+            localStorage.setItem('inventoryData', JSON.stringify(inventoryData));
+            localStorage.setItem('movementHistory', JSON.stringify(movementHistory));
+        }
 
         // Funzione per caricare i dati iniziali
         async function loadInitialData() {
-            try {
-                const response = await window.fs.readFile('SCARICHI  CAMBUSA   ESTIVO 2025.xlsx');
-                const workbook = XLSX.read(response, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
-                
-                // Salta la prima riga (intestazioni) e processa i dati
-                for (let i = 1; i < jsonData.length; i++) {
-                    const row = jsonData[i];
-                    if (row[0]) { // Se c'è un nome prodotto
-                        inventoryData.push({
-                            prodotto: row[0] || '',
-                            scarichi: row[1] || 0,
-                            cambusa: row[2] || 0,
-                            barPiscina: row[3] || 0,
-                            barFondo: row[4] || 0,
-                            giacenzaIniziale: row[7] || 0,
-                            prezzo: row[8] || 0,
-                            totale: row[9] || 0,
-                            consumo: row[10] || 0,
-                            consumoEuro: row[11] || 0
-                        });
-                    }
+            loadFromStorage();
+            
+            if (inventoryData.length === 0) {
+                try {
+                    const response = await window.fs.readFile('SCARICHI  CAMBUSA   ESTIVO 2025.xlsx');
+                    const workbook = XLSX.read(response, { type: 'array' });
+                    processExcelData(workbook);
+                } catch (error) {
+                    console.error('Errore nel caricamento del file:', error);
+                    // Dati di esempio
+                    inventoryData = [
+                        {
+                            prodotto: "SKY VODKA BASE",
+                            scarichi: 0,
+                            cambusa: 90,
+                            barPiscina: 6,
+                            barFondo: 6,
+                            giacenzaIniziale: 102,
+                            prezzo: 13.7,
+                            totale: 1397.4,
+                            consumo: 0,
+                            consumoEuro: 0
+                        }
+                    ];
                 }
-                
-                renderTable();
-                updateStats();
-            } catch (error) {
-                console.error('Errore nel caricamento del file:', error);
-                // Dati di esempio se il file non viene caricato
-                inventoryData = [
-                    {
-                        prodotto: "SKY VODKA BASE",
-                        scarichi: 0,
-                        cambusa: 90,
-                        barPiscina: 6,
-                        barFondo: 6,
-                        giacenzaIniziale: 102,
-                        prezzo: 13.7,
-                        totale: 1397.4,
-                        consumo: 0,
-                        consumoEuro: 0
-                    },
-                    {
-                        prodotto: "RAJSSA VODKA FRAGOLA",
-                        scarichi: 0,
-                        cambusa: 23,
-                        barPiscina: 4,
-                        barFondo: 6,
-                        giacenzaIniziale: 33,
-                        prezzo: 7.96,
-                        totale: 262.68,
-                        consumo: 0,
-                        consumoEuro: 0
-                    }
-                ];
-                renderTable();
-                updateStats();
             }
+            
+            renderTable();
+            updateStats();
+            updateChart();
+        }
+
+        function processExcelData(workbook) {
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: 0 });
+            
+            inventoryData = [];
+            
+            // Salta la prima riga (intestazioni) e processa i dati
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (row[0] && typeof row[0] === 'string' && row[0].trim() !== '') {
+                    const giacenzaIniziale = parseFloat(row[7]) || 0;
+                    const prezzo = parseFloat(row[8]) || 0;
+                    
+                    inventoryData.push({
+                        prodotto: row[0].trim(),
+                        scarichi: 0,
+                        cambusa: parseFloat(row[2]) || 0,
+                        barPiscina: parseFloat(row[3]) || 0,
+                        barFondo: parseFloat(row[4]) || 0,
+                        giacenzaIniziale: giacenzaIniziale,
+                        prezzo: prezzo,
+                        totale: giacenzaIniziale * prezzo,
+                        consumo: 0,
+                        consumoEuro: 0
+                    });
+                }
+            }
+            
+            saveToStorage();
         }
 
         function renderTable() {
@@ -406,25 +602,29 @@
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${item.prodotto}</td>
-                    <td><input type="number" id="scarichi_${index}" value="${item.scarichi}" min="0" step="0.1"></td>
-                    <td class="postazione cambusa">${item.cambusa}</td>
-                    <td class="postazione bar-piscina">${item.barPiscina}</td>
-                    <td class="postazione bar-fondo">${item.barFondo}</td>
-                    <td>${item.giacenzaIniziale}</td>
+                    <td><input type="number" id="scarichi_${index}" value="${item.scarichi}" min="0" step="0.1" onchange="autoCalcola()"></td>
+                    <td class="postazione cambusa">${item.cambusa.toFixed(1)}</td>
+                    <td class="postazione bar-piscina">${item.barPiscina.toFixed(1)}</td>
+                    <td class="postazione bar-fondo">${item.barFondo.toFixed(1)}</td>
+                    <td>${item.giacenzaIniziale.toFixed(1)}</td>
                     <td>€${item.prezzo.toFixed(2)}</td>
                     <td class="totale">€${item.totale.toFixed(2)}</td>
-                    <td class="consumo" id="consumo_${index}">${item.consumo}</td>
+                    <td class="consumo" id="consumo_${index}">${item.consumo.toFixed(1)}</td>
                     <td class="consumo" id="consumoEuro_${index}">€${item.consumoEuro.toFixed(2)}</td>
                 `;
             });
         }
 
-        function calcola() {
+        function autoCalcola() {
+            calcola(false);
+        }
+
+        function calcola(showAnimation = true) {
             inventoryData.forEach((item, index) => {
                 const scarichiInput = document.getElementById(`scarichi_${index}`);
                 const scarichi = parseFloat(scarichiInput.value) || 0;
                 
-                // Calcola il consumo: giacenza iniziale - scarichi
+                // Calcola il consumo: giacenza iniziale - scarichi (scarichi = quello che rimane)
                 item.scarichi = scarichi;
                 item.consumo = Math.max(0, item.giacenzaIniziale - scarichi);
                 item.consumoEuro = item.consumo * item.prezzo;
@@ -435,23 +635,27 @@
             });
             
             updateStats();
+            updateChart();
+            saveToStorage();
             
-            // Effetto visivo
-            const cells = document.querySelectorAll('.consumo');
-            cells.forEach(cell => {
-                cell.style.animation = 'pulse 0.5s ease';
-            });
-            setTimeout(() => {
+            if (showAnimation) {
+                // Effetto visivo
+                const cells = document.querySelectorAll('.consumo');
                 cells.forEach(cell => {
-                    cell.style.animation = '';
+                    cell.style.animation = 'pulse 0.5s ease';
                 });
-            }, 500);
+                setTimeout(() => {
+                    cells.forEach(cell => {
+                        cell.style.animation = '';
+                    });
+                }, 500);
+            }
         }
 
         function updateStats() {
             const totaleIniziale = inventoryData.reduce((sum, item) => sum + item.totale, 0);
             const totaleConsumo = inventoryData.reduce((sum, item) => sum + item.consumoEuro, 0);
-            const totaleRimanente = totaleIniziale - totaleConsumo;
+            const totaleRimanente = inventoryData.reduce((sum, item) => sum + (item.scarichi * item.prezzo), 0);
             const percentualeConsumo = totaleIniziale > 0 ? (totaleConsumo / totaleIniziale * 100) : 0;
             
             document.getElementById('totaleIniziale').textContent = `€${totaleIniziale.toFixed(2)}`;
@@ -460,39 +664,176 @@
             document.getElementById('percentualeConsumo').textContent = `${percentualeConsumo.toFixed(1)}%`;
         }
 
-        function salvaGiacenze() {
-            // Aggiorna le giacenze per la prossima volta
-            inventoryData.forEach((item, index) => {
-                const scarichiValue = parseFloat(document.getElementById(`scarichi_${index}`).value) || 0;
-                // La nuova giacenza iniziale diventa gli scarichi attuali
-                item.giacenzaIniziale = scarichiValue;
-                item.totale = item.giacenzaIniziale * item.prezzo;
-                
-                // Redistribuisci proporzionalmente tra le postazioni
-                const totalePostazioni = item.cambusa + item.barPiscina + item.barFondo;
-                if (totalePostazioni > 0) {
-                    const ratio = item.giacenzaIniziale / totalePostazioni;
-                    item.cambusa = Math.round(item.cambusa * ratio * 10) / 10;
-                    item.barPiscina = Math.round(item.barPiscina * ratio * 10) / 10;
-                    item.barFondo = Math.round(item.barFondo * ratio * 10) / 10;
+        function updateChart() {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            
+            // Prepara i dati per il grafico
+            const labels = inventoryData.slice(0, 20).map(item => 
+                item.prodotto.length > 20 ? item.prodotto.substring(0, 20) + '...' : item.prodotto
+            );
+            const giacenzaData = inventoryData.slice(0, 20).map(item => item.giacenzaIniziale);
+            const consumoData = inventoryData.slice(0, 20).map(item => item.consumo);
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Giacenza Iniziale',
+                            data: giacenzaData,
+                            backgroundColor: 'rgba(74, 158, 255, 0.6)',
+                            borderColor: 'rgba(74, 158, 255, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Consumo',
+                            data: consumoData,
+                            backgroundColor: 'rgba(255, 107, 107, 0.6)',
+                            borderColor: 'rgba(255, 107, 107, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 20 Prodotti - Giacenza vs Consumo',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0',
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
                 }
+            });
+        }
+
+        function salvaMovimento() {
+            const data = document.getElementById('dataSerata').value;
+            if (!data) {
+                alert('Seleziona una data per il movimento!');
+                return;
+            }
+            
+            const movimento = {
+                data: data,
+                timestamp: new Date().toISOString(),
+                prodotti: inventoryData.map(item => ({
+                    prodotto: item.prodotto,
+                    giacenzaIniziale: item.giacenzaIniziale,
+                    scarichi: item.scarichi,
+                    consumo: item.consumo,
+                    consumoEuro: item.consumoEuro
+                }))
+            };
+            
+            movementHistory.push(movimento);
+            saveToStorage();
+            
+            // Aggiorna le giacenze per il prossimo movimento
+            inventoryData.forEach(item => {
+                item.giacenzaIniziale = item.scarichi;
+                item.totale = item.giacenzaIniziale * item.prezzo;
+                item.scarichi = 0;
+                item.consumo = 0;
+                item.consumoEuro = 0;
             });
             
             renderTable();
             updateStats();
-            alert('Giacenze salvate con successo! I valori sono stati aggiornati.');
+            updateChart();
+            saveToStorage();
+            
+            alert(`Movimento del ${data} salvato con successo!`);
         }
 
         function resetScarichi() {
             if (confirm('Sei sicuro di voler resettare tutti gli scarichi?')) {
-                inventoryData.forEach((item, index) => {
+                inventoryData.forEach((item) => {
                     item.scarichi = 0;
                     item.consumo = 0;
                     item.consumoEuro = 0;
                 });
                 renderTable();
                 updateStats();
+                updateChart();
+                saveToStorage();
             }
+        }
+
+        function resetTotale() {
+            if (confirm('⚠️ ATTENZIONE: Questo resetterà TUTTE le giacenze e cancellerà lo storico. Sei sicuro?')) {
+                if (confirm('Seconda conferma: Tutti i dati saranno persi. Continuare?')) {
+                    inventoryData = [];
+                    movementHistory = [];
+                    localStorage.removeItem('inventoryData');
+                    localStorage.removeItem('movementHistory');
+                    location.reload();
+                }
+            }
+        }
+
+        function setSortAndOrder(field) {
+            document.getElementById('sortSelect').value = field;
+            sortTable();
+        }
+
+        function sortTable() {
+            const sortBy = document.getElementById('sortSelect').value;
+            const order = document.getElementById('sortOrder').value;
+            
+            inventoryData.sort((a, b) => {
+                let valueA = a[sortBy];
+                let valueB = b[sortBy];
+                
+                if (typeof valueA === 'string') {
+                    valueA = valueA.toLowerCase();
+                    valueB = valueB.toLowerCase();
+                }
+                
+                if (order === 'asc') {
+                    return valueA > valueB ? 1 : -1;
+                } else {
+                    return valueA < valueB ? 1 : -1;
+                }
+            });
+            
+            renderTable();
         }
 
         function esportaDati() {
@@ -527,46 +868,108 @@
 
         function openModal() {
             document.getElementById('uploadModal').style.display = 'block';
+        } {
+                content.innerHTML = '<div class="no-history">Nessun movimento registrato</div>';
+            } else {
+                let html = '<table class="history-table"><thead><tr>';
+                html += '<th>Data</th><th>Ora</th><th>Consumo Totale €</th><th>Azioni</th>';
+                html += '</tr></thead><tbody>';
+                
+                movementHistory.forEach((movimento, index) => {
+                    const date = new Date(movimento.timestamp);
+                    const consumoTotale = movimento.prodotti.reduce((sum, p) => sum + p.consumoEuro, 0);
+                    
+                    html += '<tr>';
+                    html += `<td>${movimento.data}</td>`;
+                    html += `<td>${date.toLocaleTimeString('it-IT')}</td>`;
+                    html += `<td>€${consumoTotale.toFixed(2)}</td>`;
+                    html += `<td><button class="button" onclick="viewMovementDetails(${index})">Dettagli</button></td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                content.innerHTML = html;
+            }
+            
+            document.getElementById('historyModal').style.display = 'block';
         }
 
-        function closeModal() {
-            document.getElementById('uploadModal').style.display = 'none';
+        function viewMovementDetails(index) {
+            const movimento = movementHistory[index];
+            let html = `<h3>Dettagli Movimento del ${movimento.data}</h3>`;
+            html += '<table class="history-table"><thead><tr>';
+            html += '<th>Prodotto</th><th>Giacenza Iniziale</th><th>Scarichi</th><th>Consumo</th><th>Consumo €</th>';
+            html += '</tr></thead><tbody>';
+            
+            movimento.prodotti.forEach(p => {
+                if (p.consumo > 0) {
+                    html += '<tr>';
+                    html += `<td>${p.prodotto}</td>`;
+                    html += `<td>${p.giacenzaIniziale.toFixed(1)}</td>`;
+                    html += `<td>${p.scarichi.toFixed(1)}</td>`;
+                    html += `<td>${p.consumo.toFixed(1)}</td>`;
+                    html += `<td>€${p.consumoEuro.toFixed(2)}</td>`;
+                    html += '</tr>';
+                }
+            });
+            
+            html += '</tbody></table>';
+            html += '<button class="button" onclick="openHistoryModal()">Torna allo storico</button>';
+            
+            document.getElementById('historyContent').innerHTML = html;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
+                const resultDiv = document.getElementById('uploadResult');
+                
+                resultDiv.innerHTML = '<p style="color: #4a9eff;">Caricamento in corso...</p>';
+                
                 reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
-                    
-                    inventoryData = [];
-                    for (let i = 1; i < jsonData.length; i++) {
-                        const row = jsonData[i];
-                        if (row[0]) {
-                            inventoryData.push({
-                                prodotto: row[0] || '',
-                                scarichi: row[1] || 0,
-                                cambusa: row[2] || 0,
-                                barPiscina: row[3] || 0,
-                                barFondo: row[4] || 0,
-                                giacenzaIniziale: row[7] || 0,
-                                prezzo: row[8] || 0,
-                                totale: row[9] || 0,
-                                consumo: row[10] || 0,
-                                consumoEuro: row[11] || 0
-                            });
-                        }
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        processExcelData(workbook);
+                        
+                        resultDiv.innerHTML = `
+                            <div style="color: #4caf50; padding: 10px; background: #1a3a1a; border-radius: 5px; margin-top: 10px;">
+                                ✅ File caricato con successo!<br>
+                                📦 ${inventoryData.length} prodotti caricati<br>
+                                💰 Valore totale: €${inventoryData.reduce((sum, item) => sum + item.totale, 0).toFixed(2)}
+                            </div>
+                        `;
+                        
+                        renderTable();
+                        updateStats();
+                        updateChart();
+                        
+                        setTimeout(() => {
+                            closeModal('uploadModal');
+                            resultDiv.innerHTML = '';
+                        }, 3000);
+                        
+                    } catch (error) {
+                        resultDiv.innerHTML = `
+                            <div style="color: #ff4444; padding: 10px; background: #3a1a1a; border-radius: 5px;">
+                                ❌ Errore nel caricamento del file: ${error.message}
+                            </div>
+                        `;
                     }
-                    
-                    renderTable();
-                    updateStats();
-                    closeModal();
-                    alert('File caricato con successo!');
                 };
+                
                 reader.readAsArrayBuffer(file);
             }
         }
@@ -576,14 +979,22 @@
         style.textContent = `
             @keyframes pulse {
                 0% { transform: scale(1); }
-                50% { transform: scale(1.1); background-color: rgba(255, 107, 107, 0.2); }
+                50% { transform: scale(1.05); background-color: rgba(255, 107, 107, 0.2); }
                 100% { transform: scale(1); }
+            }
+            
+            .sortable::after {
+                content: ' ↕';
+                opacity: 0.5;
             }
         `;
         document.head.appendChild(style);
 
         // Carica i dati all'avvio
         window.addEventListener('load', loadInitialData);
+
+        // Salva automaticamente quando si chiude la pagina
+        window.addEventListener('beforeunload', saveToStorage);
     </script>
 </body>
 </html>
